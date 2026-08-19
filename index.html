@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Magic Age Cards Creator</title>
+	<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+	<style>
+		.multiline {
+			width: 100%;
+		}
+		.smaller {
+			font-size: 0.9em;
+		}
+	</style>
+</head>
+<body>
+	<div class="container mt-5">
+		<h1 title="Magic Age Cards Creator">MACC <span style="font-size: small">(from <a href="https://exclusivemagic.com?macc" target="blank">Exclusive Magic</a>)</span></h1>
+		<h4>Inspired by Max Maven's Racer's Edge routine in <a href="https://www.penguinmagic.com/p/982?src=jay" target="blank">Prism</a></h4>
+		<hr  />
+		<div class="row mt-3">
+			<div class="col">
+				Type a list of words, objects, etc., in the box below, then click the Distribute button and it will create the other cards you need, based on the order of the items in your list.
+			</div>
+		</div>
+
+		<div class="row mt-3">
+			<div class="col">
+				<h3>All Fifteen Items</h3>
+			</div>
+		</div>
+
+		<div class="row mt-3">
+			<div class="col-6">
+				<textarea id="masterText" class="form-control multiline" rows="10" placeholder="Enter 15 items, one per line.">Grand Canyon
+Sedona
+Monument Valley
+Hoover Dam
+Glen Canyon Rec Area
+Jerome Ghost Town
+Canyon De Chelly Cliff Dwellings 
+Horseshoe Bend
+Havasu Falls
+Lake Mead Recreation Area
+Tombstone
+Petrified Forest National Park
+Saguaro National Park
+Antelope Canyon
+Organ Pipe Cactus Monument</textarea>
+			</div>
+			<div class="col-6">
+				<button class="btn btn-primary smaller mb-3" onclick="distributeItems()">Distribute</button>
+				<hr />
+				<button class="btn btn-primary smaller mb-3" onclick="copyMasterToClipboard()">Copy to Clipboard with Numbers</button>
+			</div>
+		</div>
+
+		<hr />
+
+		<div class="row mt-3">
+			<div class="col">
+				<h4>Card 1 (Value 1)</h4>
+			</div>
+			<div class="col">
+				<h4>Card 2 (Value 2)</h4>
+			</div>
+			<div class="col">
+				<h4>Card 3 (Value 4)</h4>
+			</div>
+			<div class="col">
+				<h4>Card 4 (Value 8)</h4>
+			</div>
+		</div>
+
+		<div class="row mt-3">
+			<div class="col">
+				<textarea id="card1" class="form-control" rows="8"></textarea>
+			</div>
+			<div class="col">
+				<textarea id="card2" class="form-control" rows="8"></textarea>
+			</div>
+			<div class="col">
+				<textarea id="card3" class="form-control" rows="8"></textarea>
+			</div>
+			<div class="col">
+				<textarea id="card4" class="form-control" rows="8"></textarea>
+			</div>
+		</div>
+
+		<div class="row mt-3">
+			<div class="col">
+				<button class="btn btn-success btn-block" onclick="copyTextToClipboard(0)">Copy To Clipboard</button>
+			</div>
+			<div class="col">
+				<button class="btn btn-success btn-block" onclick="copyTextToClipboard(1)">Copy To Clipboard</button>
+			</div>
+			<div class="col">
+				<button class="btn btn-success btn-block" onclick="copyTextToClipboard(2)">Copy To Clipboard</button>
+			</div>
+			<div class="col">
+				<button class="btn btn-success btn-block" onclick="copyTextToClipboard(3)">Copy To Clipboard</button>
+			</div>
+		</div>
+
+		<hr />
+
+		<div class="row mt-3">
+			<div class="col">
+				Copyright 2023 by <a href="https://exclusivemagic.substack.com" target="_blank">Exclusive Magic</a>
+			</div>
+		</div>
+	</div>
+
+<script>
+		function distributeItems() {
+			const masterText = document.getElementById('masterText').value.split('\n').map(line => line.trim());
+			const numberOfCards = 4; // Currently dealing with 4 cards (1, 2, 4, 8)
+			const maxItems = Math.min(15, masterText.length); // Only handle the first 15 items
+			const cards = Array.from({ length: numberOfCards }, () => []); // Initialize empty arrays for each card
+	
+			// Distribute items across cards based on the inverse of binary representation
+			for (let i = 0; i < maxItems; i++) {
+				let binaryIndex = (i + 1).toString(2).padStart(numberOfCards, '0'); // Convert index to binary (1-based)
+				for (let cardIndex = 0; cardIndex < numberOfCards; cardIndex++) {
+					// Place the item in the card if the binary digit is '0'
+					if (binaryIndex[binaryIndex.length - 1 - cardIndex] === '0' || binaryIndex == "1111") {
+						cards[cardIndex].push(masterText[i]);
+					}
+				}
+			}
+			// Alphabetize the items in each card before setting the textarea values
+			cards.forEach((card, index) => {
+				cards[index] = card.sort();
+			});
+			// Set the text areas with the distributed items
+			document.getElementById('card1').value = cards[0].join('\n');
+			document.getElementById('card2').value = cards[1].join('\n');
+			document.getElementById('card3').value = cards[2].join('\n');
+			document.getElementById('card4').value = cards[3].join('\n');
+		}
+
+		function copyTextToClipboard(cardIndex) {
+			const cardId = ['card1', 'card2', 'card3', 'card4'][cardIndex];
+			const textArea = document.getElementById(cardId);
+			textArea.select();
+			document.execCommand('copy');
+			alert('Card ' + (cardIndex + 1) + ' copied to clipboard!');
+		}
+
+		function copyMasterToClipboard() {
+			const masterText = document.getElementById('masterText').value;
+			const numberedText = masterText.split('\n').map((line, index) => `${index + 1}. ${line.trim()}`).join('\n');
+			const tempTextArea = document.createElement('textarea');
+			document.body.appendChild(tempTextArea);
+			tempTextArea.value = numberedText;
+			tempTextArea.select();
+			document.execCommand('copy');
+			document.body.removeChild(tempTextArea);
+			alert('Master text copied to clipboard with numbers!');
+		}
+	</script>
+</body>
+</html>
